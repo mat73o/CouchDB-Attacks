@@ -4,14 +4,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class CouchDBInjection {
 
-    // IP address of the db to be attacked, including the port number (127.0.0.1:8080)
+    // IP address of the db to be attacked, including the port number (e.g. 127.0.0.1:8080)
     private String ipAddr;
     // Version number of the couch db to be attacked (different kind of attacks for different versions)
     private String version;
@@ -90,7 +88,7 @@ public class CouchDBInjection {
 
         BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
         String inputLine;
-        StringBuffer response = new StringBuffer();
+        StringBuilder response = new StringBuilder();
 
         while ((inputLine = in.readLine()) != null) {
             response.append(inputLine);
