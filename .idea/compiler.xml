@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <bytecodeTargetLevel>
+      <module name="CouchDBgradle" target="16" />
+      <module name="CouchDBgradle.main" target="16" />
+      <module name="CouchDBgradle.test" target="16" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
