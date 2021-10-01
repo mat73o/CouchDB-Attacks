@@ -8,7 +8,7 @@ public class Main {
         switch (db.getVersion()) {
             case "1.6.1":
                 // do something
-                db.injection161("");
+                db.injection161();
                 break;
             case "3.1.1":
                 // do something
