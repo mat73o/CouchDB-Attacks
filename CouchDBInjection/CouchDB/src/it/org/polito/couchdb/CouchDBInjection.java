@@ -122,7 +122,7 @@ public class CouchDBInjection {
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
         con.setDoOutput(true);
         con.setRequestMethod("PUT");
-        con.setRequestProperty("Content-Type", "application/json");
+        //con.setRequestProperty("Content-Type", "application/json");
         try {
             OutputStreamWriter osw = new OutputStreamWriter(con.getOutputStream());
             osw.write(data);
